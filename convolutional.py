@@ -103,3 +103,72 @@ def cnn_model_functions(features, labels, mode, lr=0.001):
 
 def get_data(train_folder, eval_folder):
 	return (train_data, eval_data)
+
+def train(train_data, train_labels, classifier, iterations=50):
+	
+	# log information
+	tensors_to_log = {"probabilities":"softmax_tensor"}
+	logging_hook = tf.train.LoggingTensorHook(
+		tensors=tensors_to_log, every_n_iter=iterations)
+
+	# train our model
+	train_input_fn = tf.estimator.inputs.numpy_input_fn(
+		x={"x": train_data},
+		y=train_labels,
+		batch_size=100,
+		num_epochs=None,
+		shuffle=True)
+	classifier.train(
+		input_fn=train_input_fn,
+		steps=20000,
+		hooks=[logging_hook])
+
+	return classifier
+
+def test(eval_data, eval_labels, classifier):
+	eval_input_fn = tf.estimator.inputs.numpy_input_fn(
+    	x={"x": eval_data},
+    	y=eval_labels,
+    	num_epochs=1,
+    	shuffle=False)
+	eval_results = classifier.evaluate(input_fn=eval_input_fn)
+	
+	return eval_results
+
+def main():
+	train_data = []
+	train_labels = []
+	eval_data = []
+	eval_labels = []
+
+	# preprocess images to 64 x 64 numpy arrays
+	bulk = get_data("training_foldername", "eval_foldername")
+
+	# grab data
+	for key, value in bulk[0].items():
+		train_data.add(key)
+		train_labels.add(value)
+
+	for key, value in bulk[1].items():
+		eval_data.add(key)
+		eval_labels.add(value)
+
+	# cast to numpy arrays
+	train_data = np.asarray(train_data)
+	train_labels = np.asarray(train_labels)
+	eval_data = np.asarray(eval_data)
+	eval_labels = np.asarray(eval_labels)
+
+	# create estimator
+	coin_classifier = tf.estimator.Estimator(
+		model_fn = cnn_model_functions,
+		model_dir = "/checkpoints")
+
+	# train the classifier
+	coin_classifier = train(train_data, train_labels, coin_classifier)
+
+	# evaluate effectiveness
+	results = test(eval_data, eval_labels, coin_classifier)
+	print(results)
+
+main()
