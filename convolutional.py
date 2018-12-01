@@ -14,9 +14,6 @@ Potential things to change:
 
 def cnn_model_functions(features, labels, mode, lr=0.001):
 
-	# transform images into 64x64 numpy arrays
-	features = pre_process(features)
-
 	# create input layer
 	input_layer = tf.reshape(features["x"], [-1, 64, 64, 3])
 
@@ -104,9 +101,5 @@ def cnn_model_functions(features, labels, mode, lr=0.001):
 			loss=loss, 
 			eval_metric_ops=eval_metric_ops)
 
-def pre_process(features):
-
-	for feature in features:
-
-
-	return final_features
+def get_data(train_folder, eval_folder):
+	return (train_data, eval_data)
