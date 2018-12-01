@@ -142,7 +142,7 @@ def main():
 	eval_labels = []
 
 	# preprocess images to 64 x 64 numpy arrays
-	bulk = get_data("training_foldername", "eval_foldername")
+	bulk = get_data("train_set", "test_set")
 
 	# grab data
 	for key, value in bulk[0].items():
@@ -171,4 +171,63 @@ def main():
 	results = test(eval_data, eval_labels, coin_classifier)
 	print(results)
 
+def get_data(train_folder, eval_folder):
+	train_dict = {}
+	for training_set in os.listdir(train_folder):
+		if training_set != ".DS_Store":
+			train_dict[training_set] = get_folder_elements(train_folder + "/" + training_set)
+		print("Done with a sub folder")
+	print("Done with Train_Dict")
+	test_dict = {}
+	for test_set in os.listdir(eval_folder):
+		if test_set != ".DS_Store":
+			test_dict[test_set] = get_folder_elements(eval_folder + "/" + test_set)
+		print("done with a sub folder")
+
+
+	return (train_dict, test_dict)
+
+def get_folder_elements(folder): 
+	onlyfiles = [f for f in os.listdir(folder) if os.path.isfile(os.path.join(folder, f))]
+
+	file_names = []
+	for _file in onlyfiles:
+		if _file != ".DS_Store":
+			file_names.append(_file)
+
+	images = []
+
+	for _file in file_names:
+		print(_file)
+		img = load_img(folder + "/" + _file)  # this is a PIL image
+		# Convert to Numpy Array
+		x = img_to_array(img)  
+		converted_array = convert_image_to_64x64(x, len(x), len(x[0]))
+		images.append(converted_array)
+	for each in images:
+		print(each)
+	return images
+
+
+def convert_image_to_64x64(array, height, width):
+	num_per_bucket = np.zeros((64, 64, 3))
+	new_array = np.zeros((64, 64, 3))
+	height_ratio = height/64
+	width_ratio = width/64
+
+
+	for row in range(0, height):
+		for col in range(0, width):
+			for rgb in range(0, 3):
+				new_array[int(row//height_ratio)][int(col//width_ratio)][rgb] += array[row][col][rgb]
+				num_per_bucket[int(row//height_ratio)][int(col//width_ratio)][rgb] += 1
+
+	for row in range(0, 64):
+		for col in range(0, 64):
+			for rgb in range(0, 3):
+				new_array[row][col][rgb] = int(new_array[row][col][rgb]/num_per_bucket[row][col][rgb])
+
+	return new_array
+
+	
 main()
