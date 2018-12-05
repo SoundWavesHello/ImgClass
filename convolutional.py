@@ -29,7 +29,7 @@ def cnn_model_functions(features, labels, mode):
 	# TODO: check filter number; currently maintaining 1:1 then 2:1
 	con_layer1 = tf.layers.conv2d(
 		inputs = input_layer,
-		filters = 32,
+		filters = 32 * 3,
 		kernel_size = [5, 5],
 		padding="same",
 		activation = tf.nn.relu)
@@ -41,7 +41,7 @@ def cnn_model_functions(features, labels, mode):
 
 	con_layer2 = tf.layers.conv2d(
 		inputs = pool_layer1,
-		filters = 64,
+		filters = 64 * 3,
 		kernel_size = [5,5],
 		padding = "same",
 		activation = tf.nn.relu)
@@ -76,7 +76,7 @@ def cnn_model_functions(features, labels, mode):
 
 	# create a map of predictions for PREDICT and EVAL modes
 	predictions = {
-		"classes": tf.argmax(inputs=logits, axis=1),
+		"classes": tf.argmax(input=logits, axis=1),
 		"probabilities": tf.nn.softmax(logits, name="softmax_tensor")
 	}
 
@@ -124,7 +124,7 @@ def train(train_data, train_labels, classifier, iterations=50):
 	train_input_fn = tf.estimator.inputs.numpy_input_fn(
 		x={"x": train_data},
 		y=train_labels,
-		batch_size=100,
+		batch_size=14,
 		num_epochs=None,
 		shuffle=True)
 	classifier.train(
@@ -155,13 +155,21 @@ def main():
 
 	# grab data
 	for key, value in bulk[0].items():
-		train_data.append(key)
-		train_labels.append(value)
+		print(len(value))
+		for image in value:
+			train_data.append(image)
+			train_labels.append(key)
 
 	for key, value in bulk[1].items():
-		eval_data.append(key)
-		eval_labels.append(value)
-
+		for image in value:
+			eval_data.append(image)
+			eval_labels.append(key)
+		
+	print("TRAINDATA")
+	print(train_data)
+	print(len(train_data))
+	print("Trainlabels")
+	print(train_labels)
 	# cast to numpy arrays
 	train_data = np.asarray(train_data)
 	train_labels = np.asarray(train_labels)
@@ -169,9 +177,7 @@ def main():
 	eval_labels = np.asarray(eval_labels)
 
 	# create estimator
-	coin_classifier = tf.estimator.Estimator(
-		model_fn = cnn_model_functions,
-		model_dir = "/checkpoints")
+	coin_classifier = tf.estimator.Estimator(model_fn = cnn_model_functions, model_dir = "/checkpoints")
 
 	# train the classifier
 	coin_classifier = train(train_data, train_labels, coin_classifier)
