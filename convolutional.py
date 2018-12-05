@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
 
+
 '''
 Potential things to change:
 - number of filters in convolutional layers
@@ -10,7 +11,6 @@ Potential things to change:
 - activation function
 - node units in dense layer
 '''
-
 
 def cnn_model_functions(features, labels, mode, lr=0.001):
 
