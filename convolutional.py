@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+import os
 
 
 '''
@@ -67,7 +68,7 @@ def cnn_model_functions(features, labels, mode, lr=0.001):
 
 	# create a map of predictions for PREDICT and EVAL modes
 	predictions = {
-		"classes": tf.argmax(inputs=logits, axis=1)
+		"classes": tf.argmax(inputs=logits, axis=1),
 		"probabilities": tf.nn.softmax(logits, name="softmax_tensor")
 	}
 
@@ -101,8 +102,6 @@ def cnn_model_functions(features, labels, mode, lr=0.001):
 			loss=loss, 
 			eval_metric_ops=eval_metric_ops)
 
-def get_data(train_folder, eval_folder):
-	return (train_data, eval_data)
 
 def train(train_data, train_labels, classifier, iterations=50):
 	
@@ -142,7 +141,7 @@ def main():
 	eval_labels = []
 
 	# preprocess images to 64 x 64 numpy arrays
-	bulk = get_data("train_set", "test_set")
+	bulk = get_data("training_set", "test_set")
 
 	# grab data
 	for key, value in bulk[0].items():
