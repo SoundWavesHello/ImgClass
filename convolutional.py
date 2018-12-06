@@ -16,6 +16,8 @@ Potential things to change:
 
 IMG_RES = 28
 
+LABEL_DICT = {'animal': 0, 'blank': 1, 'building': 2, 'child': 3, 'figure': 4, 'group': 5, 'mythical': 6, 'object': 7, 'plants': 8, 'portrait': 9, 'portrait_female': 10, 'portrait_male': 11, 'symbol': 12, 'text': 13}
+INV_DICT = {v: k for k, v in LABEL_DICT.items()}
 
 def cnn_model_functions(features, labels, mode):
 
@@ -158,30 +160,33 @@ def main():
 		print(len(value))
 		for image in value:
 			train_data.append(image)
-			train_labels.append(key)
+			train_labels.append(LABEL_DICT[key])
 
 	for key, value in bulk[1].items():
 		for image in value:
 			eval_data.append(image)
-			eval_labels.append(key)
+			eval_labels.append(LABEL_DICT[key])
 		
-	print("TRAINDATA")
-	print(train_data)
-	print(len(train_data))
-	print("Trainlabels")
-	print(train_labels)
+	# print("TRAINDATA")
+	# print(train_data)
+	# print(len(train_data))
+	# print("Trainlabels")
+	# print(train_labels)
 	# cast to numpy arrays
 	train_data = np.asarray(train_data)
 	train_labels = np.asarray(train_labels)
 	eval_data = np.asarray(eval_data)
 	eval_labels = np.asarray(eval_labels)
 
+	print("---------------CREATING CLASSIFIER----------------")
 	# create estimator
-	coin_classifier = tf.estimator.Estimator(model_fn = cnn_model_functions, model_dir = "/checkpoints")
+	coin_classifier = tf.estimator.Estimator(model_fn = cnn_model_functions, model_dir = "checkpoints/")
 
+	print("---------------TRAINING CLASSIFIER----------------")
 	# train the classifier
 	coin_classifier = train(train_data, train_labels, coin_classifier)
 
+	print("---------------EVALUATING CLASSIFIER----------------")
 	# evaluate effectiveness
 	results = test(eval_data, eval_labels, coin_classifier)
 	print(results)
