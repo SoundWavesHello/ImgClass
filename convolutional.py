@@ -14,7 +14,7 @@ Potential things to change:
 - node units in dense layer
 '''
 
-IMG_RES = 28
+IMG_RES = 64
 
 LABEL_DICT = {'animal': 0, 'blank': 1, 'building': 2, 'child': 3, 'figure': 4, 'group': 5, 'mythical': 6, 'object': 7, 'plants': 8, 'portrait': 9, 'portrait_female': 10, 'portrait_male': 11, 'symbol': 12, 'text': 13}
 INV_DICT = {v: k for k, v in LABEL_DICT.items()}
@@ -24,7 +24,7 @@ def cnn_model_functions(features, labels, mode):
 	print("Starting NN")
 
 	# create input layer
-	input_layer = tf.reshape(features["x"], [-1, 28, 28, 3])
+	input_layer = tf.reshape(features["x"], [-1, 64, 64, 3])
 
 	print("Done with input layer")
 
@@ -57,7 +57,7 @@ def cnn_model_functions(features, labels, mode):
 	# TODO: there are 3 channels in input due to color image; 
 	# is that relationship maintained in future layer channels?
 	pool_flat = tf.reshape(pool_layer2,
-		[-1, 7 * 7 * 64 * 3])
+		[-1, 16 * 16 * 64 * 3])
 
 	# create fully connected layer
 	dense = tf.layers.dense(
@@ -131,7 +131,7 @@ def train(train_data, train_labels, classifier, iterations=50):
 		shuffle=True)
 	classifier.train(
 		input_fn=train_input_fn,
-		steps=20000,
+		steps=4000,
 		hooks=[logging_hook])
 
 	return classifier
@@ -153,7 +153,7 @@ def main():
 	eval_labels = []
 
 	# preprocess images to 64 x 64 numpy arrays
-	bulk = get_data("train_set_small", "test_set_small")
+	bulk = get_data("training_set_64", "test_set_64")
 
 	# grab data
 	for key, value in bulk[0].items():
@@ -212,7 +212,7 @@ def get_folder_elements(folder):
 
 	file_names = []
 	for _file in onlyfiles:
-		if _file != ".DS_Store":
+		if _file != ".DS_Store" and _file.endswith(".jpg"):
 			file_names.append(_file)
 
 	images = []
